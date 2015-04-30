@@ -12,9 +12,11 @@ import org.htmlparser.util.ParserException;
 public class SiteScraper {
 
 	public static void main(String[] args) {
-	    
+		SiteScraper.getLinksOnPage("http://nos.nl").forEach(System.out::println);
+	}
+	
+	public static List<String> getLinksOnPage(final String url) {
 	    final List<String> result = new LinkedList<String>();
-	    final String url = "http://nu.nl";
 	    
 	    try {
 	    	final Parser htmlParser = new Parser(url);
@@ -28,7 +30,7 @@ public class SiteScraper {
 	        e.printStackTrace(); // TODO handle error
 	    }
 
-	    result.forEach(System.out::println);
+	    return result;
 	}
 
 }
