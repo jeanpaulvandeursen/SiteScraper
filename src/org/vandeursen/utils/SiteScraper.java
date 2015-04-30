@@ -1,5 +1,6 @@
 package org.vandeursen.utils;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -12,7 +13,10 @@ import org.htmlparser.util.ParserException;
 public class SiteScraper {
 
 	public static void main(String[] args) {
-		SiteScraper.getLinksOnPage("http://nos.nl").forEach(System.out::println);
+		Iterator it = SiteScraper.getLinksOnPage("testpage2.html").iterator();
+		while(it.hasNext()){
+			System.out.println(it.next());
+		}
 	}
 	
 	public static List<String> getLinksOnPage(final String url) {
