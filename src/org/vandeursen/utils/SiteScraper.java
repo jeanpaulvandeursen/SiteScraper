@@ -1,5 +1,6 @@
 package org.vandeursen.utils;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,15 +13,57 @@ import org.htmlparser.util.ParserException;
 
 public class SiteScraper {
 
+	static String startPageUrl = "http://www.vandeursen.org";
+	static List<String> allLinks = new ArrayList<>();
+	
 	public static void main(String[] args) {
-		Iterator it = SiteScraper.getLinksOnPage("testpage2.html").iterator();
-		while(it.hasNext()){
-			System.out.println(it.next());
-		}
+		
+		SiteScraper.getLinksOnSite(startPageUrl);
+		
 	}
 	
-	public static List<String> getLinksOnPage(final String url) {
-	    final List<String> result = new LinkedList<String>();
+	private static void getLinksOnSite(final String startPageUrl) {
+		
+		String pageUrl = "";
+		boolean newLinkFound = false;
+
+		
+		for (String link : SiteScraper.getLinksOnPage(startPageUrl)) {
+			System.out.println(link);
+			if (!allLinks.contains(link)){
+				allLinks.add(link);
+				newLinkFound = true;
+			}
+		}
+		
+		while (newLinkFound) {
+			newLinkFound = false;
+			List<String> newLinks = new ArrayList<>();
+			Iterator<String> it = allLinks.iterator();		
+			
+			while(it.hasNext()){
+
+				pageUrl = it.next();
+			
+				for (String link : SiteScraper.getLinksOnPage(pageUrl)) {
+					System.out.println(link);
+					if (!allLinks.contains(link)){
+						newLinks.add(link);
+						newLinkFound = true;
+					}
+				}
+			}
+			if (newLinkFound) {
+				allLinks.addAll(newLinks);
+			}
+		}
+		
+		System.out.println("");
+		allLinks.forEach(System.out::println);
+	}
+	
+	private static List<String> getLinksOnPage(final String url) {
+	    final List<String> result = new LinkedList<>();
 	    
 	    try {
 	    	final Parser htmlParser = new Parser(url);
@@ -31,7 +74,7 @@ public class SiteScraper {
 	            result.add(loopLinkStr);
 	        }
 	    } catch (ParserException e) {
-	        e.printStackTrace(); // TODO handle error
+	        e.printStackTrace();
 	    }
 
 	    return result;
