@@ -1,19 +1,22 @@
 package org.vandeursen.utils;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.htmlparser.Parser;
-import org.htmlparser.filters.NodeClassFilter;
+import org.htmlparser.filters.LinkRegexFilter;
 import org.htmlparser.tags.LinkTag;
 import org.htmlparser.util.NodeList;
 import org.htmlparser.util.ParserException;
 
 public class SiteScraper {
 
-	static String startPageUrl = "http://www.vandeursen.org";
+	static String startPageUrl = "http://www.abnamro.nl";
 	static List<String> allLinks = new ArrayList<>();
 	
 	public static void main(String[] args) {
@@ -29,12 +32,16 @@ public class SiteScraper {
 
 		
 		for (String link : SiteScraper.getLinksOnPage(startPageUrl)) {
-			System.out.println(link);
 			if (!allLinks.contains(link)){
 				allLinks.add(link);
+				System.out.println("start: "+link);
 				newLinkFound = true;
 			}
 		}
+		
+		Collections.sort(allLinks);
+		
+		int itCounter = 0;
 		
 		while (newLinkFound) {
 			newLinkFound = false;
@@ -46,7 +53,6 @@ public class SiteScraper {
 				pageUrl = it.next();
 			
 				for (String link : SiteScraper.getLinksOnPage(pageUrl)) {
-					System.out.println(link);
 					if (!allLinks.contains(link)){
 						newLinks.add(link);
 						newLinkFound = true;
@@ -55,7 +61,12 @@ public class SiteScraper {
 			}
 			if (newLinkFound) {
 				allLinks.addAll(newLinks);
+				Collections.sort(allLinks);
+				System.out.println("");
+				allLinks.forEach(System.out::println);
 			}
+			itCounter++;
+			System.out.println(itCounter);
 		}
 		
 		System.out.println("");
@@ -66,14 +77,19 @@ public class SiteScraper {
 	    final List<String> result = new LinkedList<>();
 	    
 	    try {
+			URI uri = new URI(url);
+			String domain = uri.getHost();
+			System.out.println(url);
 	    	final Parser htmlParser = new Parser(url);
-	        final NodeList tagNodeList = htmlParser.extractAllNodesThatMatch(new NodeClassFilter(LinkTag.class));
+			String domainRegex = ".*"+domain+".*html$";
+			LinkRegexFilter linkRegexFilter = new LinkRegexFilter(domainRegex);
+	        final NodeList tagNodeList = htmlParser.extractAllNodesThatMatch(linkRegexFilter);
 	        for (int j = 0; j < tagNodeList.size(); j++) {
 	            final LinkTag loopLink = (LinkTag) tagNodeList.elementAt(j);
 	            final String loopLinkStr = loopLink.getLink();
 	            result.add(loopLinkStr);
 	        }
-	    } catch (ParserException e) {
+	    } catch (URISyntaxException|ParserException e) {
 	        e.printStackTrace();
 	    }
 
